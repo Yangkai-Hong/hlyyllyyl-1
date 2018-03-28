@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+   <meta charset="utf-8">
+   <title>COMP5347 Assignment One</title>
+   <link rel="stylesheet" href="index.css" />
+   <script type="text/javascript" src="index.js"></script>
+</head>
+<body onload="init()">
+<form method="get" action="">
+<div id="searchBox">
+   <input type='text' id='link_id'>
+   <input type='button' id='link' value='search' onClick='Search()'>
+
+   <select id="f_content">
+      <option value="All">All</option>
+      <option value="Art">Art</option>
+      <option value="Science History">Science History</option>
+      <option value="Action and Adventure">Action and Adventure</option>
+      <option value="Health">Health</option>
+      <option value="Science Fiction">Science Fiction</option>
+      <option value="Information Technology">Information Techonology</option>
+   </select>
+   <input type='button' value='Filter' onClick='Filter()'>
+
+   <p class="r_button" id="num">(0)</p>
+   <img src="images/cart.png" class="icon"></img>
+   <input type='button' value='Reset the cart' class="r_button" onClick='Reset()'>
+   <input type='button' value='Add to cart' class="r_button" onClick='Add()'>
+
+</div>
+<div id="listBox">
+   <table id="json_content">
+      <caption>Online Book Store</caption>
+      <tr>
+         <th>Title</th>
+         <th>Authors</th>
+         <th>Year</th>
+         <th>Price</th>
+         <th>Publisher</th>
+         <th>Category</th>
+      </tr>
+   </table>
+
+   <div class="hide" id="boundary1">
+      <p id="dynamic"></p>
+      <p>Try something like</p>
+      <p id="example1"></p>
+      <p id="example2"></p>
+   </div>
+
+</div>
+</form>
+</body>
+</html>
