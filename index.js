@@ -1,11 +1,9 @@
 function loadJSON(callback) {
-
     var xobj = new XMLHttpRequest();
     xobj.overrideMimeType("application/json");
-    xobj.open('GET', 'data.json', true); // Replace 'my_data' with the path to your file
+    xobj.open('GET', 'data.json', true);
     xobj.onreadystatechange = function () {
         if (xobj.readyState == 4 && xobj.status == "200") {
-            // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
             callback(xobj.responseText);
         }
     };
@@ -17,12 +15,15 @@ function init() {
         // Parse JSON string into object
         var actual_JSON = JSON.parse(response);
         for(var i=0;i<actual_JSON.length;i++){
-            var checkbox = document.createElement("input");
-            checkbox.setAttribute('type','checkbox');
-            checkbox.setAttribute('class','checkbox');
+            var checkBox = document.createElement("input");
+            checkBox.setAttribute('type','checkbox');
+            checkBox.setAttribute('class','checkbox');
+            var checkbox = document.createElement("td");
+            checkbox.appendChild(checkBox);
 
 			var img=document.createElement("img");
 			img.src=actual_JSON[i].img;
+			img.setAttribute('class','thumbnail');
             var imagine = document.createElement("td");
             imagine.appendChild(img);
 
@@ -46,122 +47,190 @@ function init() {
             category.innerHTML = actual_JSON[i].category;
             category.setAttribute('class','category');
 
-            var each_row = document.createElement("tr");
-            each_row.appendChild(checkbox);
-            each_row.appendChild(imagine);
-            each_row.appendChild(title);
-            each_row.appendChild(authors);
-            each_row.appendChild(year);
-            each_row.appendChild(price);
-            each_row.appendChild(publisher);
-            each_row.appendChild(category);
+            var tableRow = document.createElement("tr");
+            tableRow.appendChild(checkbox);
+            tableRow.appendChild(imagine);
+            tableRow.appendChild(title);
+            tableRow.appendChild(authors);
+            tableRow.appendChild(year);
+            tableRow.appendChild(price);
+            tableRow.appendChild(publisher);
+            tableRow.appendChild(category);
 
-            var element = document.getElementById("json_content");
-            element.appendChild(each_row);
+            var element = document.getElementById("jsonContent");
+            element.appendChild(tableRow);
 		}
     });
 }
 
-function Search()
+function search()
 {
-    var m = document.getElementById('link_id').value;
+    filter();
+
+    var searchText = document.getElementById('searchText').value.toLowerCase();
+    //console.log(m);
+    var pattern = new RegExp(searchText);
     var searchArea = document.querySelectorAll(".title");
-    var result = 0;
-    for (var i=0;i<searchArea.length;i++){
-        if(m == searchArea[i].innerHTML){
-            document.getElementById("boundary1").style.display = "none";
-            document.getElementById("json_content").style.display = "inline";
-            //console.log(searchArea[i].innerHTML);
-            searchArea[i].parentElement.style.backgroundColor = "yellow";
-            result = 1;
-        }
-            else{
+    var numMatch = 0;
+
+    var e = document.getElementById("filterText");
+    var strFilter = e.options[e.selectedIndex].text;
+    var filterArea = document.querySelectorAll(".category");
+
+    document.getElementById("boundary").style.display = "none";
+    document.getElementById("jsonContent").style.display = "table-row-group";
+
+    if(searchText == ""){
+        numMatch = 10;
+        for (var i=0;i<searchArea.length;i++){
             searchArea[i].parentElement.style.backgroundColor = "#FFFFFF";
         }
     }
-    //after loop finish do...
-    if(result == 0){
-        dynamic();
-        document.getElementById("boundary1").style.display = "inline";
-        document.getElementById("json_content").style.display = "none";
+    else {
+        for (var i = 0; i < filterArea.length; i++) {
+            if (strFilter == "Category" || filterArea[i].innerHTML == strFilter) {
+                var result = pattern.test(searchArea[i].innerHTML.toLowerCase());
+                if (result == true) {
+                    searchArea[i].parentElement.style.backgroundColor = "yellow";
+                    numMatch += 1;
+                }
+                else {
+                    searchArea[i].parentElement.style.backgroundColor = "#FFFFFF";
+                    numMatch += 0;
+                }
+            }
+            else {
+            }
+        }
     }
-    if(m == ""){
-        reloadPage();
+    //after loop finish do...
+    //console.log(num_title_match);
+    if(numMatch == 0){
+        showSearchBoundary();
     }
 }
 
-function Filter()
+function filter()
 {
-    var e = document.getElementById("f_content");
+    var e = document.getElementById("filterText");
     var strFilter = e.options[e.selectedIndex].text;
     var filterArea = document.querySelectorAll(".category");
-    var f_result = 0;
+    var filterResult = 0;
 
-    if(strFilter == "All"){
-        reloadPage();
+    document.getElementById("boundary").style.display = "none";
+    document.getElementById("jsonContent").style.display = "table-row-group";
+
+    if(strFilter == "Category"){
+        for (var i = 0; i < filterArea.length; i++) {
+            filterArea[i].parentElement.style.display = "table-row";
+        }
+        filterResult = 10;
     }
     else {
-        document.getElementById("boundary1").style.display = "none";
-        document.getElementById("json_content").style.display = "table";
         for (var i = 0; i < filterArea.length; i++) {
             if (filterArea[i].innerHTML != strFilter) {
                 filterArea[i].parentElement.style.display = "none";
-                f_result += 0;
+                filterResult += 0;
             }
             else {
                 filterArea[i].parentElement.style.display = "table-row";
-                f_result += 1;
+                filterResult += 1;
             }
             //console.log(filterArea[i].innerHTML);
         }
     }
     //after loop finish do...
-    console.log(f_result);
-    if(f_result == 0){
-        dynamic_filter();
-        document.getElementById("boundary1").style.display = "inline";
-        document.getElementById("json_content").style.display = "none";
+    //console.log(f_result);
+    if(filterResult == 0){
+        showFilterBoundary();
     }
 }
 
-function Add() {
-    var checkboxs = document.querySelectorAll(".checkbox");
-    var len = document.getElementById("num").innerHTML.length;
-    var j = document.getElementById("num").innerHTML.substring(1,len);
-    j = parseInt(j);
+function addBook() {
+    var checkBoxs = document.querySelectorAll(".checkbox");
+    var element = document.getElementById("bookNum").innerHTML;
+    var actualNum = element.substring(1,element.length);
+    actualNum = parseInt(actualNum);
     //console.log(j);
-    for(var i=0;i<checkboxs.length;i++){
-        if(checkboxs[i].checked == true){
-            j = j+1;
+    for(var i=0; i<checkBoxs.length; i++){
+        if(checkBoxs[i].checked == true){
+            actualNum += 1;
+            checkBoxs[i].checked = false;
         }
     }
-    document.getElementById("num").innerHTML = "("+j+")";
+    document.getElementById("bookNum").innerHTML = "("+actualNum+")";
 }
 
-function Reset() {
-    var r = confirm("Reset the cart?");
-    if (r==true)
+function resetCart() {
+    var confirmWindow = confirm("Reset the cart?");
+    var checkBoxs = document.querySelectorAll(".checkbox");
+
+    if (confirmWindow == true)
     {
-        document.getElementById("num").innerHTML = "(0)";
+        document.getElementById("bookNum").innerHTML = "(0)";
+        for(var i=0;i<checkBoxs.length;i++){
+            checkBoxs[i].checked = false;
+        }
     }
     else{}
 }
 
-function reloadPage()
-{
-    window.location.reload()
+function showSearchBoundary(){
+    var searchText = document.getElementById("searchText").value;
+
+    var e = document.getElementById("filterText");
+    var strFilter = e.options[e.selectedIndex].text;
+    var filterArea = document.querySelectorAll(".category");
+
+    var searchArea = document.querySelectorAll(".title");
+
+    var caseList = [];
+
+    for(var i=0;i<filterArea.length;i++){
+        if(strFilter == "Category"){
+            caseList.push("The Arts: A Visual Encyclopedia");
+            caseList.push("The Hunger Games");
+        }
+        else if (filterArea[i].innerHTML == strFilter) {
+            caseList.push(searchArea[i].innerHTML);
+        }
+    }
+    //console.log(caseList);
+    var case1 = caseList[0];
+    var case2 = caseList[1];
+
+    document.getElementById("boundaryText").innerHTML = "Your search term \"" + searchText + "\" does not appear in any title of books in " + "\"" + strFilter + "\"";
+    document.getElementById("case1").innerHTML = "· " + case1;
+    document.getElementById("case2").innerHTML = "· " + case2;
+
+    document.getElementById("boundary").style.display = "inline";
+    document.getElementById("jsonContent").style.display = "none";
+
+    if(strFilter == "Information Technology"){
+        showFilterBoundary();
+    }
 }
 
-function dynamic(){
-    var searchText = document.getElementById("link_id").value;
-    document.getElementById("dynamic").innerHTML = "Your search \"" + searchText + "\" did not match any title of books.";
-    document.getElementById("example1").innerHTML = "· The Arts: A Visual Encyclopedia";
-    document.getElementById("example2").innerHTML = "· The Hunger Games";
+function showFilterBoundary() {
+    var filterText = document.getElementById("filterText").value;
+    document.getElementById("boundaryText").innerHTML = "Your filter term \"" + filterText + "\" does not contain any books.";
+    document.getElementById("case1").innerHTML = "· Art";
+    document.getElementById("case2").innerHTML = "· Health";
+
+    document.getElementById("boundary").style.display = "inline";
+    document.getElementById("jsonContent").style.display = "none";
 }
 
-function dynamic_filter() {
-    var filterText = document.getElementById("f_content").value;
-    document.getElementById("dynamic").innerHTML = "Your filter \"" + filterText + "\" did not contain any books.";
-    document.getElementById("example1").innerHTML = "· Art";
-    document.getElementById("example2").innerHTML = "· Health";
+function enterSearch(e) {
+    if (e.keyCode == 13) {
+        document.getElementById("searchButton").click();
+        document.getElementById("searchText").blur();
+    }
+}
+
+function enterFilter(e){
+    if (e.keyCode == 13){
+        document.getElementById("filterButton").click();
+        document.getElementById("filterText").blur();
+    }
 }
